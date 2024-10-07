@@ -29,7 +29,7 @@ public class Main {
             for (String fileName : fileNames) {
                 Path filePath = sourceDir.resolve(fileName);
                 if (!Files.exists(filePath)) {
-                    createLargeTextFile(filePath, FILE_SIZE_KB);
+                    createLargeTextFile(filePath);
                     System.out.println("Создан файл: " + filePath);
                 } else { System.out.println("Файл уже существует: " + filePath); }
             }
@@ -40,7 +40,7 @@ public class Main {
                 Path sourceFile = sourceDir.resolve(fileName);
                 Path destFile = destDir.resolve("sequential_" + fileName);
                 copyFile(sourceFile, destFile);
-                System.out.println("Скопирован файл (последовательно): " + destFile.toString());
+                System.out.println("Скопирован файл (последовательно): " + destFile);
             }
             long endSequential = System.nanoTime();
             long durationSequential = endSequential - startSequential;
@@ -56,7 +56,7 @@ public class Main {
                     Path sourceFile = sourceDir.resolve(fileName);
                     Path destFile = destDir.resolve("parallel_" + fileName);
                     copyFile(sourceFile, destFile);
-                    System.out.println("Скопирован файл (параллельно): " + destFile.toString());
+                    System.out.println("Скопирован файл (параллельно): " + destFile);
                 });
             }
             for (Future<?> future : futures) { future.get(); }
@@ -64,21 +64,21 @@ public class Main {
             long endParallel = System.nanoTime();
             long durationParallel = endParallel - startParallel;
             System.out.println("Время параллельного копирования: " + formatDuration(durationParallel));
-            System.out.println("Разница последовательного от паралельного: " + formatDuration(durationSequential - durationParallel));
+            System.out.println("Разница последовательного от параллельного: " + formatDuration(durationSequential - durationParallel));
         } catch (IOException | InterruptedException | ExecutionException e) { e.printStackTrace(); }
     }
 
     private static void copyFile(Path source, Path destination) {
         try { Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            System.err.println("Ошибка копирования файла: " + source.toString() + " -> " + destination.toString());
+            System.err.println("Ошибка копирования файла: " + source + " -> " + destination);
             e.printStackTrace();}
     }
 
-    private static void createLargeTextFile(Path path, int sizeKb) throws IOException {
+    private static void createLargeTextFile(Path path) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(path, StandardOpenOption.CREATE)) {
             String line = "TOP SECRET DATA TOP SECRET DATA TOP SECRET DATA TOP SECRET DATA TOP SECRET DATA";
-            int lines = (sizeKb * 1024) / line.length();
+            int lines = (FILE_SIZE_KB * 1024) / line.length();
             for (int i = 0; i < lines; i++) { writer.write(line); writer.newLine(); }
         }
     }
